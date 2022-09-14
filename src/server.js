@@ -38,6 +38,11 @@ app.use(function(req, res, next) {
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
     next();
 });
+
+app.get("/", (req, res) => {
+    res.status(200).json({ mess: 'hello' })
+})
+
 app.get("/checkUer", async(req, res) => {
     let [rows, fields] = await cnnn.promise().query('select * from UserRegister')
     res.status(200).json({ data: rows })
