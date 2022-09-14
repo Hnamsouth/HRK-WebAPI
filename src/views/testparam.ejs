@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <title>Title</title>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS v5.2.0-beta1 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
+    <style>
+        .inpuser {
+            width: 100%;
+        }
+        
+        .tb1,
+        td,
+        th {
+            border: 1px solid;
+            text-align: center;
+        }
+        
+        .tb1 {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .tb1 th {
+            background-color: rgb(230, 230, 230);
+        }
+        
+        .actionUser a {
+            text-decoration: none;
+            color: black;
+            text-transform: uppercase;
+            font-size: 18px;
+            margin-left: 5px;
+            font-weight: 500;
+            border: 1px solid black;
+        }
+    </style>
+</head>
+
+
+
+<body>
+    <ul class="nav nav-tabs">
+        <li class="nav-item">
+            <a href="#" class="nav-link active">Test CRUD</a>
+        </li>
+        <li class="nav-item">
+            <a href="#" class="nav-link">NOne</a>
+        </li>
+        <li class="nav-item">
+            <a href="#" class="nav-link">register</a>
+        </li>
+        <li class="nav-item">
+            <a href="#" class="nav-link">login</a>
+        </li>
+
+        <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">API Test</a>
+            <div class="dropdown-menu">
+                <a class="dropdown-item" href="/get-api">Method GET</a>
+                <a class="dropdown-item" href="/post-api">Method Post</a>
+                <a class="dropdown-item" href="/put-api">Method Put</a>
+                <a class="dropdown-item" href="/delete-api">Method Delete</a>
+            </div>
+        </li>
+        <li class="nav-item">
+            <a href="#" class="nav-link disabled">Disabled</a>
+        </li>
+    </ul>
+
+
+    <p>
+        <%=data %>
+    </p>
+    <p>
+        <%=JSON.stringify(dtEdit) %>
+    </p>
+    <div class="container">
+        <form action="<%=stas==true?'/from_edit':'/from_post' %> " method="POST">
+            <div class="row">
+                <div class="col-xl-4">
+                    <label>Name: </label>
+                    <input type="text" name="id" hidden value="<%=stas==true?dtEdit[0].id:'' %>">
+                    <input class="inpuser" type="text" name="name" placeholder="Name" value="<%=stas==true?dtEdit[0].STN_Name:'' %>">
+                </div>
+                <div class="col-xl-4">
+                    <label>Age: </label>
+                    <input class="inpuser" type="number" name="age" placeholder="Age" value="<%=stas==true?dtEdit[0].Age:'' %>">
+                </div>
+                <div class="col-xl-4">
+                    <label>ClassID: </label>
+                    <input class="inpuser" type="number" name="classid" placeholder="ClassID" value="<%=stas==true?dtEdit[0].ClassID:'' %>">
+                </div>
+                <div class="col-xl-4">
+                    <label>ClassID: </label>
+                    <!-- <input class="inpuser" type="number" name="classid" placeholder="ClassID" value="<%=stas==true?dtEdit[0].ClassID:'' %>"> -->
+                    <select name="optionClassId" a>
+                        <option  value="1" >1</option>
+                        <option value="2" >2</option>
+                        <option value="3">3</option> 
+                    </select>
+                </div>
+            </div>
+            <div class="alert alert-danger alert-dismissible fade show mt-4" role="alert" <%=SMerr!==true? 'hidden': ''%>>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+
+                <strong>Miss Params</strong> You should check in on some of those fields below.
+            </div>
+            <div class=" d-flex justify-content-center">
+                <button type="submit" class="btn btn-primary col-xl-6 mt-4"><%=stas==true?'save':'submit' %> </button>
+            </div>
+    </div>
+    </form>
+    <br>
+    </div>
+
+    <table class="tb1">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>STN_Name</th>
+                <th>Age</th>
+                <th>ClassID</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            <%for(let i in data2){ %>
+                <tr class="tbrow">
+                    <td>
+                        <%= data2[i].id %>
+                    </td>
+                    <td>
+                        <%= data2[i].STN_Name%>
+                    </td>
+                    <td>
+                        <%= data2[i].Age%>
+                    </td>
+                    <td>
+                        <%= data2[i].ClassID%>
+                    </td>
+                    <td class="actionUser d-flex justify-content-evenly">
+                        <a type="button" href="/conn1">Detail</a>
+                        <a type="button" href='/conn1?id=<%=data2[i].id%>'>edit</a>
+                        <a type="botton" href='/delete/<%=data2[i].id%>'>delete</a>
+                    </td>
+                </tr>
+                <% } %>
+        </tbody>
+    </table>
+    <%  %>
+
+
+
+</body>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.5/dist/umd/popper.min.js" integrity="sha384-Xe+8cL9oJa6tN/veChSP7q+mnSPaj5Bcu9mPX5F5xIGE0DVittaqT5lorf0EI7Vk" crossorigin="anonymous"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.min.js" integrity="sha384-kjU+l4N0Yf4ZOJErLsIcvOU2qSb74wXpOhqTvwVx3OElZRweTnQ6d31fXEoRD1Jy" crossorigin="anonymous"></script>
+
+</html>
