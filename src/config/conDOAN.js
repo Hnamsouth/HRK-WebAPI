@@ -2,7 +2,7 @@ import { connect } from 'mssql'
 import mysql from 'mysql2'
 
 const cnnn = mysql.createConnection({
-    host: "123.16.16.117", //  123.16.16.117  - api.pokabi.tech -  pokabi.tech
+    host: "pokabi.tech", //  123.16.16.117  - api.pokabi.tech -  pokabi.tech
     user: "admin_edit",
     password: "adminedit",
     database: "Eproject",
@@ -11,13 +11,18 @@ const cnnn = mysql.createConnection({
 })
 
 cnnn.connect((err) => {
-    if (err) { console.log(err) } else {
-        console.log('connected conDO-AN')
+        if (err) { console.log(err) } else {
+            console.log('connected conDO-AN')
+        }
+    })
+    // cnnn.query('select * from Register')
+
+cnnn.query('SELECT * FROM `UserRegister`', (err, data) => {
+    if (err) {
+        console.log('query error')
+    } else {
+        console.table(data)
+
     }
 })
-cnnn.query('select * from Register')
-
-// cnnn.query('SELECT * FROM `category` WHERE 1', (err, data) => {
-//     console.log(data)
-// })
 export default cnnn;

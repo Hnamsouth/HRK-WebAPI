@@ -1,7 +1,5 @@
 import pool from '../config/conPRM';
 import connection from '../config/conPRM2';
-import condb4 from '../config/connDB';
-import coninfinity from '../config/conINFINITY';
 
 var homepage = (req, res) => {
     return res.render('demohtml.ejs')

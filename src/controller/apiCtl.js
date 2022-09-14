@@ -1,6 +1,5 @@
 import pool from '../config/conPRM';
 import connection from '../config/conPRM2';
-import condb4 from '../config/connDB';
 
 var getAPI = async(req, res) => {
         let id = req.query.id;
