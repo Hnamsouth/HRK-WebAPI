@@ -39,13 +39,17 @@ app.use(function(req, res, next) {
     next();
 });
 
-app.get("/", (req, res) => {
-    res.status(200).json({ mess: 'hello' })
+app.get("/", async(req, res) => {
+    let [rows, fields] = await cnnn.promise().query('select * from UserRegister')
+
+    res.status(200).json({ data: rows })
 })
 
 app.get("/checkUer", async(req, res) => {
-    let [rows, fields] = await cnnn.promise().query('select * from UserRegister')
-    res.status(200).json({ data: rows })
+    let { Email, Password } = req.query
+    let [rows, fields] = await cnnn.promise().query('select * from UserRegister where Email like ? and Password like ? ', [Email, Password])
+    res.status(200).json({ mess: 'User found', status: 1 })
+
 })
 app.post("/createUser", async(req, res) => {
 
@@ -53,9 +57,9 @@ app.post("/createUser", async(req, res) => {
         // FirstName,LastName,Email,Password
     console.log(FirstName, LastName, Email, Password)
     if (!FirstName || !LastName || !Email || !Password) {
-        res.status(200).json({ mess: "Miss required params" })
+        res.status(200).json({ mess: "Miss required params", params: req.query })
     }
-    let [rows, fields] = await cnnn.promise().query('insert into UserRegister values (?,?,?,?)', [FirstName, LastName, Email, Password])
+    let [rows, fields] = await cnnn.promise().query('insert into UserRegister values(?,?,?,?)', [FirstName, LastName, Email, Password])
 })
 
 
