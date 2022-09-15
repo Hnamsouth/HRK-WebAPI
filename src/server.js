@@ -13,29 +13,29 @@ import 'dotenv/config' //
 
 import bodyParser from 'body-parser';
 import mysql from 'mysql2'
-// const cnnn = mysql.createPool({
-//         host: "pokabi.tech", //  123.16.16.117  - api.pokabi.tech -  pokabi.tech
-//         user: "admin_edit",
-//         password: "adminedit",
-//         database: "eproject",
-//         waitForConnections: true,
-//         connectionLimit: 10,
-//         queueLimit: 0
-//             // port: 3306,
-//             // socketPath: "/Applications/MAMP/tmp/mysql/mysql.sock"
-//     })
 const cnnn = mysql.createPool({
-    host: "127.0.0.1", //  123.16.16.117  - api.pokabi.tech -  pokabi.tech
-    user: "root",
-    password: "",
-    database: "eproject",
-    port: 3306,
-    waitForConnections: true,
-    connectionLimit: 10,
-    queueLimit: 0
-        // port: 3306,
-        // socketPath: "/Applications/MAMP/tmp/mysql/mysql.sock"
-})
+        host: "pokabi.tech", //  123.16.16.117  - api.pokabi.tech -  pokabi.tech
+        user: "admin_edit",
+        password: "adminedit",
+        database: "eproject",
+        waitForConnections: true,
+        connectionLimit: 10,
+        queueLimit: 0
+            // port: 3306,
+            // socketPath: "/Applications/MAMP/tmp/mysql/mysql.sock"
+    })
+    // const cnnn = mysql.createPool({
+    //     host: "127.0.0.1", //  123.16.16.117  - api.pokabi.tech -  pokabi.tech
+    //     user: "root",
+    //     password: "",
+    //     database: "eproject",
+    //     port: 3306,
+    //     waitForConnections: true,
+    //     connectionLimit: 10,
+    //     queueLimit: 0
+    //         // port: 3306,
+    //         // socketPath: "/Applications/MAMP/tmp/mysql/mysql.sock"
+    // })
 
 
 const app = express()
