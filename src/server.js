@@ -6,6 +6,7 @@ import express from 'express';
 import cors from 'cors'
 
 import nodemailer from 'nodemailer';
+import { Buffer } from 'node:buffer';
 
 import 'dotenv/config' // 
 
@@ -59,13 +60,22 @@ app.use(cors({ origin: "*" }));
 app.use(bodyParser.json());
 
 app.get("/", async(req, res) => {
-    let [rows, fields] = await cnnn.promise().query('select * from register')
-
+    let [rows, fields] = await cnnn.promise().query('select * from register');
+    console.log(rows)
     res.status(200).json({ data: rows })
 })
 
-app.post("/checkUer", async(req, res) => {
-    console.log(req.body)
+app.post("/checkverify", async(req, res) => {
+    let { emailorphone } = req.body;
+    let [rows, fields] = await cnnn.promise().query('select sttregister from register where emailorphone like ?', [emailorphone]);
+    if (rows[0].sttregister === 1) {
+        res.status(200).json({ mess: "user register success", data: rows[0].sttregister })
+    } else {
+        res.status(200).json({ mess: "user not registed", data: rows[0].sttregister })
+    }
+})
+app.get("/checkUerlogin", async(req, res) => {
+    // console.log(req.body)
     let { emailorphone, password } = req.body
     if (!emailorphone || !password) {
         res.status(200).json({ mess: 'Miss required params', status: 404 })
@@ -77,66 +87,123 @@ app.post("/checkUer", async(req, res) => {
             res.status(200).json({ mess: 'User not found', status: false, data: rows })
         }
     }
-
 })
-app.post("/createUser", async(req, res) => {
-        console.log(req.body)
 
-        let { firstname, lastname, emailorphone, password } = req.body
-            // FirstName,LastName,Email,Password
-        if (firstname == '' || lastname == '' || emailorphone == '' || password == '') {
-            res.status(200).json({ mess: "Miss required params", params: req.body })
+app.post("/createUser", async(req, res) => {
+    // console.log(req.body)
+    let { firstname, lastname, emailorphone, password, cverify } = req.body
+    console.log(req.body)
+        // FirstName,LastName,Email,Password
+    if (firstname == '' || lastname == '' || emailorphone == '' || password == '') {
+        res.status(200).json({ mess: "Miss required params", params: req.body })
+    } else {
+        let [rows, fields] = await cnnn.promise().query('select * from register where emailorphone like ?', [emailorphone]);
+        // let [rows2, fields2] = await cnnn.promise().query('select * from register')
+        if (rows.length == 1 && rows[0].sttregister == 0) {
+            // neu user =1 va sttrgt = 0 (co trong db nhung chua verify)thì gửi lại mess tơi email đó
+            //  update cverify
+            await cnnn.promise().query('update register set cverify = ?,firstname= ?, lastname= ?,password=? where emailorphone like ?', [cverify, firstname, lastname, password, emailorphone]);
+            // let [rows22, fields] = await cnnn.promise().query('select * from register where emailorphone like ?', [emailorphone]);
+            res.status(200).json({ mess: 'User not verify', status: 101 })
+                // res.redirect('sendmail')
+        } else if (rows.length == 0) {
+            // nếu user =0 thì push data và sendmail 
+            await cnnn.promise().query('INSERT INTO `register` (`firstname`, `lastname`, `emailorphone`, `password`,`cverify`) VALUES (?,?,?,?,?)', [firstname, lastname, emailorphone, password, cverify])
+            res.status(200).json({ mess: " add user compelete", status: 202 })
         } else {
-            // console.log(firstname, lastname, emailorphone, password)
-            await cnnn.promise().query('INSERT INTO `register` (`firstname`, `lastname`, `emailorphone`, `password`) VALUES (?,?,?,?)', [firstname, lastname, emailorphone, password])
-            res.status(200).json({ mess: "user created", data: req.body })
+            // neu user =1 va sttrgt = 1 trả về mess: tk đã đc đăng ký
+            res.status(200).json({ mess: 'User registed', status: 303 })
+        }
+    }
+})
+app.post('/sttrgt', async(req, res) => {
+    console.log(req.query)
+    res.status(200).json({ mess: 'user sc', checkregister: 200 })
+})
+
+app.get('/updateregister', async(req, res) => {
+        console.log(req.query)
+        let { emailorphone, cverify } = req.query
+        if (!emailorphone || !cverify) {
+            res.status(200).json({ mess: 'Miss required params', checkregister: 404 })
+        } else {
+            let [rows, fields] = await cnnn.promise().query('select count(*) as user from register where emailorphone like ? and cverify = ? ', [emailorphone, cverify])
+            if (rows[0].user == 1) {
+                await cnnn.promise().query('update register set sttregister = 1 where emailorphone = ?', [emailorphone])
+
+                res.redirect(`http://localhost:4200/login`)
+                    // res.status(200).json({ mess: 'User registed success', checkregister: 303 })
+            } else {
+                res.status(200).json({
+                    mess: 'User not found',
+                    checkregister: 202
+                })
+            }
         }
     })
     // define a sendmail endpoint, which will send emails and response with the corresponding status
-app.get("/sendmail", (req, res) => {
-    // user: "namhvth2204008@fpt.edu.vn",
-    //         pass: "AFMhn17397"
+app.post("/sendmail", async(req, res) => {
+    // console.log(req.body)
+    let { User, Stt } = req.body;
+    let check = await cnnn.promise().query(`select sttregister from register where emailorphone like '${User}'`)
     nodemailer.createTestAccount((err, account) => {
         if (err) {
             console.error('Failed to create a testing account. ' + err.message);
             return process.exit(1);
         }
-
         console.log('Credentials obtained, sending message...');
-
         // Create a SMTP transporter object
         let transporter = nodemailer.createTransport({
             host: "smtp.gmail.com",
             port: 587,
             secure: false,
             auth: {
-                user: "namhvth2204008@fpt.edu.vn",
-                pass: "AFMhn17397"
+                user: process.env.USER,
+                pass: process.env.PASS
             }
         });
-
         // Message object
         let message = {
-            from: 'namhvth2204008@fpt.edu.vn',
-            to: 'hnam17397@gmail.com',
+            from: process.env.USER,
+            to: User,
             subject: 'Nodemailer is unicode friendly ✔',
             text: 'Hello to myself!',
-            html: `
-            <body style="background-color:rgb(248, 248, 248) ;">
-            <div >
-                <div  style="width:60%; margin:15px auto;background-color:white;box-shadow:3px 2px 5px rgb(210, 210, 210); padding:20px 20px">
-                    <div  style="">
-                        <h2>Welcome to Keansburges</h2>
-                        <img src="https://keansburgamusementpark.com/wp-content/uploads/2015/02/kap_logo.png" alt="" width="100vw">
-                        <hr>
-                        <p>Thank you for signing up as a member of keansburge. Wish you have a pleasant journey in Keansburge. Please Click Verify to Login</p>
-                        <a href="" style="color:white;text-decoration:none;font-size:18px;background-color: rgb(0, 111, 247);border:none;padding:3px 7px;border-radius:5px" >Verify</a>
-                        <br><br><br>
-                        <a href="https://keansburgamusementpark.com/">https://keansburgamusementpark.com/</a>
-                    </div>
-                </div>
-            </div>
-        </body>`,
+            html: `<table border="0" cellspacing="0" cellpadding="0" style="padding-bottom:20px;max-width:516px;min-width:220px;margin:0 auto;">
+            <tbody>
+                <tr>
+                    <td width="8" style="width:8px"></td>
+                    <td>
+                        
+                        <div style="border-style:solid;border-width:thin;border-color:#dadce0;border-radius:8px;padding:40px 20px" align="center" class="m_4662939741572771938mdv2rw"><img src="https://keansburgamusementpark.com/wp-content/uploads/2015/02/kap_logo.png"
+                                width="74" height="24" aria-hidden="true" style="margin-bottom:16px" alt="Google" class="CToWUd" data-bit="iit">
+                            <div style="font-family:'Google Sans',Roboto,RobotoDraft,Helvetica,Arial,sans-serif;border-bottom:thin solid #dadce0;color:rgba(0,0,0,0.87);line-height:32px;padding-bottom:24px;text-align:center;word-break:break-word">
+                                <div style="font-size:24px">Welcome to Keansburger</div>
+                                <table align="center" style="margin-top:8px">
+                                    <tbody>
+                                        <tr style="line-height:normal">
+                                            <td align="right" style="padding-right:8px"><img width="20" height="20" style="width:20px;height:20px;vertical-align:sub;border-radius:50%" src="./public/img/iconuser.png" alt="" class="CToWUd" data-bit="iit"></td>
+                                            <td><a style="font-family:'Google Sans',Roboto,RobotoDraft,Helvetica,Arial,sans-serif;color:rgba(0,0,0,0.87);font-size:14px;line-height:20px">${User}</a></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div style="font-family:Roboto-Regular,Helvetica,Arial,sans-serif;font-size:14px;color:rgba(0,0,0,0.87);line-height:20px;padding-top:20px;text-align:center">Thank you for signing up as a member of keansburge. Wish you have a pleasant journey in Keansburge. Please Click Verify to Login.
+                                <div style="padding-top:32px;text-align:center"><form  method="post">  <a href="http://localhost:1234/updateregister?emailorphone=${User}&cverify=${Stt}" style="font-family:'Google Sans',Roboto,RobotoDraft,Helvetica,Arial,sans-serif;line-height:16px;color:#ffffff;font-weight:400;text-decoration:none;font-size:14px;display:inline-block;padding:10px 24px;background-color:#4184f3;border-radius:5px;min-width:90px"
+                                        target="_blank" data-saferedirecturl="" name="test" type="submit"> Verify - ${Stt} </a></form></div>
+                            </div>
+                            <div style="padding-top:20px;font-size:12px;line-height:16px;color:#5f6368;letter-spacing:0.3px;text-align:center">You can also watch the activity at<br><a style="color:rgba(0,0,0,0.87);text-decoration:inherit">https://keansburgamusementpark.com/</a></div>
+                        </div>
+                        <div style="text-align:left">
+                            <div style="font-family:Roboto-Regular,Helvetica,Arial,sans-serif;color:rgba(0,0,0,0.54);font-size:11px;line-height:18px;padding-top:12px;text-align:center">
+                                <div></div>
+                                <div style="direction:ltr">©2022 Keansburg Amusement Park <a class="m_4662939741572771938afal" style="font-family:Roboto-Regular,Helvetica,Arial,sans-serif;color:rgba(0,0,0,0.54);font-size:11px;line-height:18px;padding-top:12px;text-align:center">Keansburg, New Jersey, USA</a></div>
+                            </div>
+                        </div>
+                    </td>
+                    <td width="8" style="width:8px"></td>
+                </tr>
+            </tbody>
+        </table>`,
 
         };
 
@@ -146,7 +213,8 @@ app.get("/sendmail", (req, res) => {
                 return process.exit(1);
             }
 
-            res.send('Message sent success: %s', info.messageId);
+            console.log(info.messageId);
+            // 'Message sent success: %s', 
             // Preview only available when sending through an Ethereal account
             // console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
         });
@@ -154,7 +222,6 @@ app.get("/sendmail", (req, res) => {
 
 });
 //    Add the following lines of code to set configuration of Nodemailer:
-
 //   Define the options of your email like to/from-headers, subject line, and body text:
 
 
