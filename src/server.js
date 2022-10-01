@@ -132,7 +132,7 @@ app.get('/updateregister', async(req, res) => {
             let [rows, fields] = await cnnn.promise().query('select count(*) as user from nhom5_user_register where emailorphone like ? and cverify = ? ', [emailorphone, cverify])
             if (rows[0].user == 1) {
                 await cnnn.promise().query('update nhom5_user_register set sttregister = 1 where emailorphone = ?', [emailorphone])
-                res.redirect(`https://eproject-team.web.app/login`)
+                res.redirect(`https://eproject-team.web.app/`)
                     // res.status(200).json({ mess: 'User registed success', checkregister: 303 })
             } else {
                 res.status(200).json({
