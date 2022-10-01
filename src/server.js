@@ -30,10 +30,10 @@ import mysql from 'mysql2'
 //             // socketPath: "/Applications/MAMP/tmp/mysql/mysql.sock"
 //     })
 const cnnn = mysql.createPool({
-    host: "127.0.0.1", //  123.16.16.117  - api.pokabi.tech -  pokabi.tech
-    user: "root",
-    password: "",
-    database: "eproject",
+    host: "139.180.186.20", //  123.16.16.117  - api.pokabi.tech -  pokabi.tech
+    user: "t2204m",
+    password: "t2204m123",
+    database: "t2204m",
     port: 3306,
     waitForConnections: true,
     connectionLimit: 10,
@@ -60,31 +60,33 @@ app.use(cors({ origin: "*" }));
 app.use(bodyParser.json());
 
 app.get("/", async(req, res) => {
-    let [rows, fields] = await cnnn.promise().query('select * from register');
+    let [rows, fields] = await cnnn.promise().query('select * from nhom5_user_register');
     console.log(rows)
     res.status(200).json({ data: rows })
 })
 
 app.post("/checkverify", async(req, res) => {
     let { emailorphone } = req.body;
-    let [rows, fields] = await cnnn.promise().query('select sttregister from register where emailorphone like ?', [emailorphone]);
+    let [rows, fields] = await cnnn.promise().query('select sttregister from nhom5_user_register where emailorphone like ?', [emailorphone]);
     if (rows[0].sttregister === 1) {
         res.status(200).json({ mess: "user register success", data: rows[0].sttregister })
     } else {
         res.status(200).json({ mess: "user not registed", data: rows[0].sttregister })
     }
 })
-app.get("/checkUerlogin", async(req, res) => {
+app.post("/checkUerlogin", async(req, res) => {
     // console.log(req.body)
     let { emailorphone, password } = req.body
     if (!emailorphone || !password) {
         res.status(200).json({ mess: 'Miss required params', status: 404 })
     } else {
-        let [rows, fields] = await cnnn.promise().query('select count(*) from register where emailorphone like ? and password like ? ', [emailorphone, password])
-        if (rows == 1) {
-            res.status(200).json({ mess: 'User found', status: true, data: rows })
+        let [rows, fields] = await cnnn.promise().query('select count(emailorphone) as user , sttregister from nhom5_user_register where emailorphone like ? and password like ? ', [emailorphone, password])
+        if (rows[0].user == 1 && rows[0].sttregister == 1) {
+            res.status(200).json({ mess: 'User found', status: 101, data: rows })
+        } else if (rows[0].user == 1 && rows[0].sttregister == 0) {
+            res.status(200).json({ mess: 'User not verify', status: 202, data: rows })
         } else {
-            res.status(200).json({ mess: 'User not found', status: false, data: rows })
+            res.status(200).json({ mess: 'User not found', status: 303, data: rows })
         }
     }
 })
@@ -97,18 +99,18 @@ app.post("/createUser", async(req, res) => {
     if (firstname == '' || lastname == '' || emailorphone == '' || password == '') {
         res.status(200).json({ mess: "Miss required params", params: req.body })
     } else {
-        let [rows, fields] = await cnnn.promise().query('select * from register where emailorphone like ?', [emailorphone]);
+        let [rows, fields] = await cnnn.promise().query('select * from nhom5_user_register where emailorphone like ?', [emailorphone]);
         // let [rows2, fields2] = await cnnn.promise().query('select * from register')
         if (rows.length == 1 && rows[0].sttregister == 0) {
             // neu user =1 va sttrgt = 0 (co trong db nhung chua verify)thì gửi lại mess tơi email đó
             //  update cverify
-            await cnnn.promise().query('update register set cverify = ?,firstname= ?, lastname= ?,password=? where emailorphone like ?', [cverify, firstname, lastname, password, emailorphone]);
+            await cnnn.promise().query('update nhom5_user_register set cverify = ?,firstname= ?, lastname= ?,password=? where emailorphone like ?', [cverify, firstname, lastname, password, emailorphone]);
             // let [rows22, fields] = await cnnn.promise().query('select * from register where emailorphone like ?', [emailorphone]);
             res.status(200).json({ mess: 'User not verify', status: 101 })
                 // res.redirect('sendmail')
         } else if (rows.length == 0) {
             // nếu user =0 thì push data và sendmail 
-            await cnnn.promise().query('INSERT INTO `register` (`firstname`, `lastname`, `emailorphone`, `password`,`cverify`) VALUES (?,?,?,?,?)', [firstname, lastname, emailorphone, password, cverify])
+            await cnnn.promise().query('INSERT INTO `nhom5_user_register` (`firstname`, `lastname`, `emailorphone`, `password`,`cverify`) VALUES (?,?,?,?,?)', [firstname, lastname, emailorphone, password, cverify])
             res.status(200).json({ mess: " add user compelete", status: 202 })
         } else {
             // neu user =1 va sttrgt = 1 trả về mess: tk đã đc đăng ký
@@ -127,9 +129,9 @@ app.get('/updateregister', async(req, res) => {
         if (!emailorphone || !cverify) {
             res.status(200).json({ mess: 'Miss required params', checkregister: 404 })
         } else {
-            let [rows, fields] = await cnnn.promise().query('select count(*) as user from register where emailorphone like ? and cverify = ? ', [emailorphone, cverify])
+            let [rows, fields] = await cnnn.promise().query('select count(*) as user from nhom5_user_register where emailorphone like ? and cverify = ? ', [emailorphone, cverify])
             if (rows[0].user == 1) {
-                await cnnn.promise().query('update register set sttregister = 1 where emailorphone = ?', [emailorphone])
+                await cnnn.promise().query('update nhom5_user_register set sttregister = 1 where emailorphone = ?', [emailorphone])
 
                 res.redirect(`http://localhost:4200/login`)
                     // res.status(200).json({ mess: 'User registed success', checkregister: 303 })
@@ -145,7 +147,7 @@ app.get('/updateregister', async(req, res) => {
 app.post("/sendmail", async(req, res) => {
     // console.log(req.body)
     let { User, Stt } = req.body;
-    let check = await cnnn.promise().query(`select sttregister from register where emailorphone like '${User}'`)
+    let check = await cnnn.promise().query(`select sttregister from nhom5_user_register where emailorphone like '${User}'`)
     nodemailer.createTestAccount((err, account) => {
         if (err) {
             console.error('Failed to create a testing account. ' + err.message);
