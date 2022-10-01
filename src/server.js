@@ -132,8 +132,7 @@ app.get('/updateregister', async(req, res) => {
             let [rows, fields] = await cnnn.promise().query('select count(*) as user from nhom5_user_register where emailorphone like ? and cverify = ? ', [emailorphone, cverify])
             if (rows[0].user == 1) {
                 await cnnn.promise().query('update nhom5_user_register set sttregister = 1 where emailorphone = ?', [emailorphone])
-
-                res.redirect(`http://localhost:4200/login`)
+                res.redirect(`https://eproject-team.web.app/login`)
                     // res.status(200).json({ mess: 'User registed success', checkregister: 303 })
             } else {
                 res.status(200).json({
@@ -176,8 +175,8 @@ app.post("/sendmail", async(req, res) => {
                     <td width="8" style="width:8px"></td>
                     <td>
                         
-                        <div style="border-style:solid;border-width:thin;border-color:#dadce0;border-radius:8px;padding:40px 20px" align="center" class="m_4662939741572771938mdv2rw"><img src="https://keansburgamusementpark.com/wp-content/uploads/2015/02/kap_logo.png"
-                                width="74" height="24" aria-hidden="true" style="margin-bottom:16px" alt="Google" class="CToWUd" data-bit="iit">
+                        <div style="border-style:solid;border-width:thin;border-color:#dadce0;border-radius:8px;padding:40px 20px" align="center" class="m_4662939741572771938mdv2rw"><img src="https://eproject-team.web.app/assets/svg/logo.svg"
+                                width="74" height="24" aria-hidden="true" style="margin-bottom:16px; filter: drop-shadow(0 1px 2px #35181f);" alt="Google" class="CToWUd" data-bit="iit">
                             <div style="font-family:'Google Sans',Roboto,RobotoDraft,Helvetica,Arial,sans-serif;border-bottom:thin solid #dadce0;color:rgba(0,0,0,0.87);line-height:32px;padding-bottom:24px;text-align:center;word-break:break-word">
                                 <div style="font-size:24px">Welcome to Keansburger</div>
                                 <table align="center" style="margin-top:8px">
@@ -190,10 +189,10 @@ app.post("/sendmail", async(req, res) => {
                                 </table>
                             </div>
                             <div style="font-family:Roboto-Regular,Helvetica,Arial,sans-serif;font-size:14px;color:rgba(0,0,0,0.87);line-height:20px;padding-top:20px;text-align:center">Thank you for signing up as a member of keansburge. Wish you have a pleasant journey in Keansburge. Please Click Verify to Login.
-                                <div style="padding-top:32px;text-align:center"><form  method="post">  <a href="http://localhost:1234/updateregister?emailorphone=${User}&cverify=${Stt}" style="font-family:'Google Sans',Roboto,RobotoDraft,Helvetica,Arial,sans-serif;line-height:16px;color:#ffffff;font-weight:400;text-decoration:none;font-size:14px;display:inline-block;padding:10px 24px;background-color:#4184f3;border-radius:5px;min-width:90px"
+                                <div style="padding-top:32px;text-align:center"><form  method="post">  <a href="https://app-t2204m-eprojet.herokuapp.com/updateregister?emailorphone=${User}&cverify=${Stt}" style="font-family:'Google Sans',Roboto,RobotoDraft,Helvetica,Arial,sans-serif;line-height:16px;color:#ffffff;font-weight:400;text-decoration:none;font-size:14px;display:inline-block;padding:10px 24px;background-color:#4184f3;border-radius:5px;min-width:90px"
                                         target="_blank" data-saferedirecturl="" name="test" type="submit"> Verify - ${Stt} </a></form></div>
                             </div>
-                            <div style="padding-top:20px;font-size:12px;line-height:16px;color:#5f6368;letter-spacing:0.3px;text-align:center">You can also watch the activity at<br><a style="color:rgba(0,0,0,0.87);text-decoration:inherit">https://keansburgamusementpark.com/</a></div>
+                            <div style="padding-top:20px;font-size:12px;line-height:16px;color:#5f6368;letter-spacing:0.3px;text-align:center">You can also watch the activity at<br><a style="color:rgba(0,0,0,0.87);text-decoration:inherit">https://eproject-team.web.app/</a></div>
                         </div>
                         <div style="text-align:left">
                             <div style="font-family:Roboto-Regular,Helvetica,Arial,sans-serif;color:rgba(0,0,0,0.54);font-size:11px;line-height:18px;padding-top:12px;text-align:center">
